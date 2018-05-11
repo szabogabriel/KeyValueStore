@@ -1,0 +1,28 @@
+<project name="KeyValueStore" basedir="." default="all">
+	
+	<property name="version" value="0.1" />
+	
+	<property name="dir.src" value="${basedir}/src" />
+	<property name="dir.bin" value="${basedir}/bin" />
+	
+	<property name="file.jar" value="${basedir}/kvstore_${version}.jar" />
+	
+	<target name="all">
+		<antcall target="clean"/>
+		<antcall target="compile"/>
+		<antcall target="package"/>
+	</target>
+	
+	<target name="clean">
+		<delete file="${file.jar}" />
+	</target>
+		
+	<target name="compile">
+		<javac srcdir="${dir.src}" destdir="${dir.bin}" />
+	</target>
+	
+	<target name="package">
+		<jar destfile="${file.jar}" basedir="${dir.bin}" />
+	</target>
+
+</project>
