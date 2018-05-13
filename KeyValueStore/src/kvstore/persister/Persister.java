@@ -1,15 +1,16 @@
 package kvstore.persister;
 
+import java.io.Serializable;
 import java.util.Map;
 
-public interface Persister {
+public interface Persister<K extends Serializable, V extends Serializable> {
 	
-	Map<String, String> load();
+	Map<K, V> load();
 	
-	void add(String key, String value);
+	void add(K key, V value);
 	
-	void remove(String key);
+	void remove(K key);
 	
-	void save(Map<String, String> data);
+	void save(Map<K, V> data);
 	
 }

@@ -1,14 +1,19 @@
 package kvstore.persister;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AuditPersister implements Persister {
+public class AuditPersister<K extends Serializable, V extends Serializable> implements Persister<K, V> {
 	
 	private final File AUDITFILE;
 	
@@ -44,8 +49,8 @@ public class AuditPersister implements Persister {
 	}
 
 	@Override
-	public Map<String, String> load() {
-		Map<String, String> ret = new HashMap<>();
+	public Map<K, V> load() {
+		Map<K, V> ret = new HashMap<>();
 		
 		try (BufferedReader in = new BufferedReader(new FileReader(AUDITFILE))) {
 			String line;
@@ -54,11 +59,11 @@ public class AuditPersister implements Persister {
 				String [] data = line.split(",");
 				
 				if (data.length > 1) {
-					String key = new String(Base64.getDecoder().decode(data[1]));
+					K key = fromBase64(data[1]);
 					switch (Operations.getOperations(data[0])) {
 					case ADD:
 						if (data.length == 3) {
-							ret.put(key, new String(Base64.getDecoder().decode(data[2])));
+							ret.put(key, fromBase64(data[2]));
 						}
 						break;
 					case REMOVE:
@@ -81,9 +86,9 @@ public class AuditPersister implements Persister {
 	}
 
 	@Override
-	public void add(String key, String value) {
-		String key64 = Base64.getEncoder().encodeToString(key.getBytes());
-		String val64 = Base64.getEncoder().encodeToString(value.getBytes());
+	public void add(K key, V value) {
+		String key64 = toBase64(key);
+		String val64 = toBase64(value);
 		StringBuilder toWrite = new StringBuilder();
 		toWrite
 			.append(Operations.ADD.toString())
@@ -97,8 +102,8 @@ public class AuditPersister implements Persister {
 	}
 
 	@Override
-	public void remove(String key) {
-		String key64 = Base64.getEncoder().encodeToString(key.getBytes());
+	public void remove(K key) {
+		String key64 = toBase64(key);
 		StringBuilder toWrite = new StringBuilder();
 		toWrite
 			.append(Operations.REMOVE.toString())
@@ -110,8 +115,8 @@ public class AuditPersister implements Persister {
 	}
 
 	@Override
-	public void save(Map<String, String> data) {
-		for (String it : data.keySet()) {
+	public void save(Map<K, V> data) {
+		for (K it : data.keySet()) {
 			add(it, data.get(it));
 		}
 	}
@@ -123,5 +128,38 @@ public class AuditPersister implements Persister {
 			e.printStackTrace();
 		}
 	}
-
+	
+	private String toBase64(Serializable object) {
+		String ret = null;
+		
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(baos);
+			oos.writeObject(object);
+			ret = Base64.getEncoder().encodeToString(baos.toByteArray());
+			oos.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return ret;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private <D> D fromBase64(String base64) {
+		D ret = null;
+		
+		try {
+			ByteArrayInputStream bais = new ByteArrayInputStream(Base64.getDecoder().decode(base64));
+			ObjectInputStream ois = new ObjectInputStream(bais);
+			Object o = ois.readObject();
+			ret = (D)o;
+			ois.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return ret;
+	}
+	
 }
