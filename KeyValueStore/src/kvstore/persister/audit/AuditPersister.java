@@ -35,18 +35,18 @@ public class AuditPersister<K extends Serializable, V extends Serializable> impl
 		for (Action it : actions) {
 			K key = fromBase64(it.getKey());
 			switch (it.getOperation()) {
-				case ADD:
-					ret.put(key, fromBase64(it.getValue()));
-					break;
-				case REMOVE:
-					ret.remove(key);
-					break;
-				case UNKNOWN:
-					//skip
-					break;
-				default:
-					//skip
-					break;
+			case ADD:
+				ret.put(key, fromBase64(it.getValue()));
+				break;
+			case REMOVE:
+				ret.remove(key);
+				break;
+			case UNKNOWN:
+				//skip
+				break;
+			default:
+				//skip
+				break;
 			}
 		}
 		
