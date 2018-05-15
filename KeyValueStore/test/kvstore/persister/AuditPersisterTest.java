@@ -15,14 +15,14 @@ import org.junit.Test;
 public class AuditPersisterTest {
 	
 	private File testFile = new File("./test/kvstore/persister/createData.file");
-	private String line_add_a_a = "add,YQ==,YQ==";
-	private String line_remove_a = "remove,YQ==";
+	private String line_add_a_a = "add,rO0ABXQAAWE=,rO0ABXQAAWE=";
+	private String line_remove_a = "remove,rO0ABXQAAWE=";
 	
 	@Test
 	public void loadEmpty() {
 		cleanup();
 		
-		AuditPersister persister = new AuditPersister(testFile);
+		AuditPersister<String, String> persister = new AuditPersister<>(testFile);
 		Map<String, String> data = persister.load();
 		
 		assertTrue(data.size() == 0);
@@ -34,7 +34,7 @@ public class AuditPersisterTest {
 	public void createData() {
 		cleanup();
 		
-		AuditPersister persister = new AuditPersister(testFile);
+		AuditPersister<String, String> persister = new AuditPersister<>(testFile);
 		persister.add("a", "a");
 		persister.remove("a");
 		
@@ -66,7 +66,7 @@ public class AuditPersisterTest {
 			e.printStackTrace();
 		}
 		
-		AuditPersister persister = new AuditPersister(testFile);
+		AuditPersister<String, String> persister = new AuditPersister<>(testFile);
 		Map<String, String> data = persister.load();
 		
 		assertTrue(data.size() == 0);
@@ -87,7 +87,7 @@ public class AuditPersisterTest {
 			e.printStackTrace();
 		}
 		
-		AuditPersister persister = new AuditPersister(testFile);
+		AuditPersister<String, String> persister = new AuditPersister<>(testFile);
 		Map<String, String> data = persister.load();
 		
 		assertTrue(data.size() == 1);
