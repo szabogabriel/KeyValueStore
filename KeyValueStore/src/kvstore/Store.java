@@ -3,8 +3,8 @@ package kvstore;
 import java.io.Serializable;
 import java.util.Map;
 
-import kvstore.persister.EmptyPersister;
 import kvstore.persister.Persister;
+import kvstore.persister.empty.EmptyPersister;
 
 public class Store<K extends Serializable, V extends Serializable> {
 	

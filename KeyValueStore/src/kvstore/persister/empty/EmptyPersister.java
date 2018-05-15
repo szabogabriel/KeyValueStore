@@ -1,8 +1,10 @@
-package kvstore.persister;
+package kvstore.persister.empty;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+
+import kvstore.persister.Persister;
 
 public class EmptyPersister<K extends Serializable, V extends Serializable> implements Persister<K, V> {
 
