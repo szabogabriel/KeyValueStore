@@ -1,4 +1,4 @@
-package kvstore.persister;
+package kvstore.persister.audit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -11,6 +11,8 @@ import java.io.FileWriter;
 import java.util.Map;
 
 import org.junit.Test;
+
+import kvstore.persister.audit.AuditPersister;
 
 public class AuditPersisterTest {
 	
