@@ -38,5 +38,19 @@ public class Store<K extends Serializable, V extends Serializable> {
 		
 		add(key, data);
 	}
+	
+	public V get(K key) {
+		return get(key, null);
+	}
+	
+	public V get(K key, V def) {
+		V ret = def;
+		
+		if (data.containsKey(key)) {
+			ret = data.get(key);
+		}
+		
+		return ret;
+	}
 
 }
