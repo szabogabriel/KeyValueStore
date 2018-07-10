@@ -48,7 +48,7 @@ public class AuditPersister<K extends Serializable, V extends Serializable> impl
 		
 		return ret;
 	}
-
+	
 	@Override
 	public void add(K key, V value) {
 		String key64 = SerializableUtils.toBase64(key);
