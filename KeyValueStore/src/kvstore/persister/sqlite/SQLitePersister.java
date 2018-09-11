@@ -15,13 +15,17 @@ import kvstore.persister.Persister;
 import kvstore.utils.SerializableUtils;
 
 public class SQLitePersister<K extends Serializable, V extends Serializable> implements Persister<K, V>, LazyMapDataProvider<K, V> {
+
+	private static final String TABLE_NAME = "SQLITEAUDITTABLE";
 	
 	private Connection CONN;
 	
-	public SQLitePersister(File targetDB) throws IllegalArgumentException {
+	public SQLitePersister(File targetDB, boolean create) throws IllegalArgumentException {
 		try {
+			if (create && targetDB.exists()) {
+				targetDB.delete();
+			}
 			Class.forName("org.sqlite.JDBC");
-			boolean create = !targetDB.exists();
 			
 	        CONN = DriverManager.getConnection("jdbc:sqlite:" + targetDB.getAbsolutePath());
 	        
@@ -36,7 +40,7 @@ public class SQLitePersister<K extends Serializable, V extends Serializable> imp
 	private void createTable() {
 		PreparedStatement ps = null;
 		try {
-			ps = prepare("CREATE TABLE DATA (KEY TEXT, VALUE TEXT);");
+			ps = prepare("CREATE TABLE " + TABLE_NAME + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, KKEY TEXT, VVALUE TEXT);");
 			ps.execute();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -65,10 +69,10 @@ public class SQLitePersister<K extends Serializable, V extends Serializable> imp
 	public void add(K key, V value) {
 		PreparedStatement ps = null;
 		try {
-			ps = prepare("INSERT INTO DATA (KEY, VALUE) VALUES (?, ?);");
+			ps = prepare("INSERT INTO " + TABLE_NAME + " (KKEY, VVALUE) VALUES (?, ?);");
 			ps.setString(1, SerializableUtils.toBase64(key));
 			ps.setString(2, SerializableUtils.toBase64(value));
-			ps.execute();
+			ps.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
@@ -87,7 +91,7 @@ public class SQLitePersister<K extends Serializable, V extends Serializable> imp
 	public void remove(K key) {
 		PreparedStatement ps = null;
 		try {
-			ps = prepare("DELETE FROM DATA WHERE KEY=?;");
+			ps = prepare("DELETE FROM " + TABLE_NAME + " WHERE KKEY=?;");
 			ps.setString(1, SerializableUtils.toBase64(key));
 			ps.execute();
 		} catch (SQLException e) {
@@ -113,7 +117,7 @@ public class SQLitePersister<K extends Serializable, V extends Serializable> imp
 	public void clear() {
 		PreparedStatement ps = null;
 		try {
-			ps = prepare("DELETE FROM DATA;");
+			ps = prepare("DELETE FROM " + TABLE_NAME + ";");
 			ps.execute();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -135,7 +139,7 @@ public class SQLitePersister<K extends Serializable, V extends Serializable> imp
 		ResultSet rs = null;
 		int ret = 0;
 		try {
-			ps = prepare("SELECT COUNT(*) FROM DATA;");
+			ps = prepare("SELECT COUNT(*) FROM " + TABLE_NAME + ";");
 			rs = ps.executeQuery();
 			rs.next();
 			ret = rs.getInt(1);
@@ -168,7 +172,7 @@ public class SQLitePersister<K extends Serializable, V extends Serializable> imp
 		ResultSet rs = null;
 		Set<K> ret = new HashSet<>();;
 		try {
-			ps = prepare("SELECT KEY FROM DATA;");
+			ps = prepare("SELECT KKEY FROM " + TABLE_NAME + ";");
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				ret.add(SerializableUtils.fromBase64(rs.getString(1)));
@@ -202,7 +206,7 @@ public class SQLitePersister<K extends Serializable, V extends Serializable> imp
 		ResultSet rs = null;
 		boolean ret = false;
 		try {
-			ps = prepare("SELECT KEY FROM DATA WHERE VALUE=?;");
+			ps = prepare("SELECT KKEY FROM " + TABLE_NAME + " WHERE VVALUE=?;");
 			ps.setString(1, SerializableUtils.toBase64(value));
 			rs = ps.executeQuery();
 			rs.next();
@@ -236,11 +240,13 @@ public class SQLitePersister<K extends Serializable, V extends Serializable> imp
 		ResultSet rs = null;
 		V ret = null;;
 		try {
-			ps = prepare("SELECT VALUE FROM DATA WHERE KEY=?;");
+			ps = prepare("SELECT VVALUE FROM " + TABLE_NAME + " WHERE KKEY=?;");
 			ps.setString(1, SerializableUtils.toBase64(key));
 			rs = ps.executeQuery();
-			rs.next();
-			ret = SerializableUtils.fromBase64(rs.getString(1));
+			if (rs.next()) {
+				String tmp = rs.getString(1);
+				ret = SerializableUtils.fromBase64(tmp);
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {

@@ -1,52 +1,32 @@
 package kvstore.persister.sqlite;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
 
 public class SQLitePersisterTest {
 	
-	private File testFile = new File("createData.db");
-	private String line_add_a_a = "add,rO0ABXQAAWE=,rO0ABXQAAWE=";
-	private String line_remove_a = "remove,rO0ABXQAAWE=";
-	
-	@Test
-	public void loadEmpty() {
-		cleanup();
-		
-		SQLitePersister<String, String> persister = new SQLitePersister<>(testFile);
-		Map<String, String> data = persister.load();
-		
-		assertTrue(data.size() == 0);
-		
-		cleanup();
-	}
+	private static File testFile = new File("createDataSqlite.db");
 	
 	@Test
 	public void createData() {
-		cleanup();
+		SQLitePersister<String, String> persister = new SQLitePersister<>(testFile, true);
 		
-		SQLitePersister<String, String> persister = new SQLitePersister<>(testFile);
-		persister.add("a", "a");
+		for (int i = 0; i < 10; i++) {
+			System.out.println("Adding data No." + i);
+			persister.add("key" + i, "theValue" + i);
+		}
 		
-		try (BufferedReader in = new BufferedReader(new FileReader(testFile))) {		
-			String line = in.readLine();
+		persister = new SQLitePersister<>(testFile, false);
+		
+		for (int i = 0; i < 10; i++) {
+			String data = persister.read("key" + i);
 			
-			assertEquals(line_add_a_a, line);
-			
-			line = in.readLine();
-			
-			assertEquals(line_remove_a, line);
-		} catch (Exception e) {
-			e.printStackTrace();
+			assertEquals("theValue" + i, data);
 		}
 		
 		cleanup();
@@ -54,44 +34,56 @@ public class SQLitePersisterTest {
 	
 	@Test
 	public void loadRemovedData() {
-		cleanup();
+		SQLitePersister<String, String> persister = new SQLitePersister<>(testFile, true);
 		
-		try (BufferedWriter out = new BufferedWriter(new FileWriter(testFile))) {
-			out.append(line_add_a_a)
-				.append(System.lineSeparator())
-				.append(line_remove_a)
-				.append(System.lineSeparator());
-		} catch (Exception e) {
-			e.printStackTrace();
+		for (int i = 0; i < 10; i++) {
+			System.out.println("Adding data No." + i);
+			persister.add("key" + i, "theValue" + i);
 		}
 		
-		SQLitePersister<String, String> persister = new SQLitePersister<>(testFile);
-		Map<String, String> data = persister.load();
+		persister = new SQLitePersister<>(testFile, false);
 		
-		assertTrue(data.size() == 0);
+		persister.remove("key5");
+		
+		assertEquals(Boolean.TRUE, null == persister.read("key5"));
+		
+		cleanup();
 	}
 	
 	@Test
-	public void loadCreatedData() {
-		cleanup();
-		
-		try (BufferedWriter out = new BufferedWriter(new FileWriter(testFile))) {
-			out.append(line_add_a_a)
-				.append(System.lineSeparator())
-				.append(line_remove_a)
-				.append(System.lineSeparator())
-				.append(line_add_a_a)
-				.append(System.lineSeparator());
-		} catch (Exception e) {
-			e.printStackTrace();
+	public void saveMap() {
+		SQLitePersister<String, String> persister = new SQLitePersister<>(testFile, true);
+		Map<String, String> toPersist = new HashMap<>();
+
+		for (int i = 0; i < 100; i++) {
+			toPersist.put("key" + i, "value" + i);
 		}
 		
-		SQLitePersister<String, String> persister = new SQLitePersister<>(testFile);
-		Map<String, String> data = persister.load();
+		persister.save(toPersist);
 		
-		assertTrue(data.size() == 1);
-		assertTrue(data.containsKey("a"));
-		assertTrue(data.get("a").equals("a"));
+		int storedSize = persister.keys().size();
+		
+		assertEquals(100, storedSize);
+		
+		cleanup();
+	}
+	
+	@Test
+	public void loadMap() {
+		SQLitePersister<String, String> persister = new SQLitePersister<>(testFile, true);
+		Map<String, String> toPersist = new HashMap<>();
+
+		for (int i = 0; i < 100; i++) {
+			toPersist.put("key" + i, "value" + i);
+		}
+		
+		persister.save(toPersist);
+		
+		persister = new SQLitePersister<>(testFile, false);
+
+		for (int i = 0; i < 100; i++) {
+			assertEquals("value" + i, persister.read("key" + i));
+		}
 		
 		cleanup();
 	}
@@ -101,5 +93,4 @@ public class SQLitePersisterTest {
 			testFile.delete();
 		}
 	}
-
 }

@@ -6,7 +6,7 @@ import java.util.Set;
 
 public class LazyMap<K, V> implements Map<K, V> {
 	
-	private LazyMapDataProvider<K, V> PROVIDER;
+	private final LazyMapDataProvider<K, V> PROVIDER;
 	
 	private Set<K> keys = null;
 	
