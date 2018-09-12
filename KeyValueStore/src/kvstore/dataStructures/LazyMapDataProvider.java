@@ -1,4 +1,4 @@
-package kvstore.persister.sqlite;
+package kvstore.dataStructures;
 
 import java.util.Set;
 
@@ -9,6 +9,8 @@ public interface LazyMapDataProvider<K, V> {
 	int size();
 	
 	Set<K> keys();
+	
+	boolean isKnownKey(K key);
 	
 	boolean isKnownData(V value);
 	

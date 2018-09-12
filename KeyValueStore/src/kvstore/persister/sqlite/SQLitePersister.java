@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import kvstore.dataStructures.LazyMap;
+import kvstore.dataStructures.LazyMapDataProvider;
 import kvstore.persister.Persister;
 import kvstore.utils.SerializableUtils;
 
@@ -18,9 +20,18 @@ public class SQLitePersister<K extends Serializable, V extends Serializable> imp
 
 	private static final String TABLE_NAME = "SQLITEAUDITTABLE";
 	
+	private final boolean CACHE_KEYS;
+	private final long MAX_CACHE_SIZE;
+	
 	private Connection CONN;
 	
 	public SQLitePersister(File targetDB, boolean create) throws IllegalArgumentException {
+		this(targetDB, create, true, 1024 * 1024 * 32);
+	}
+	
+	public SQLitePersister(File targetDB, boolean create, boolean cacheKeys, long maxsize) {
+		CACHE_KEYS = cacheKeys;
+		MAX_CACHE_SIZE = maxsize;
 		try {
 			if (create && targetDB.exists()) {
 				targetDB.delete();
@@ -62,7 +73,7 @@ public class SQLitePersister<K extends Serializable, V extends Serializable> imp
 
 	@Override
 	public Map<K, V> load() {
-		return new LazyMap<K, V>(this);
+		return new LazyMap<K, V>(this, CACHE_KEYS, MAX_CACHE_SIZE);
 	}
 
 	@Override
@@ -177,6 +188,41 @@ public class SQLitePersister<K extends Serializable, V extends Serializable> imp
 			while (rs.next()) {
 				ret.add(SerializableUtils.fromBase64(rs.getString(1)));
 			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+					rs = null;
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			if (ps != null) {
+				try {
+					ps.close();
+					ps = null;
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return ret;
+	}
+	
+	@Override
+	public boolean isKnownKey(K key) {
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		boolean ret = false;
+		try {
+			ps = prepare("SELECT COUNT(*) FROM " + TABLE_NAME + " WHERE KEY=?;");
+			ps.setString(1, SerializableUtils.toBase64(key));
+			rs = ps.executeQuery();
+			rs.next();
+			int count = rs.getInt(1);
+			ret = count == 1;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {

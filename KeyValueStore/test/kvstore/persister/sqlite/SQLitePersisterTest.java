@@ -1,6 +1,7 @@
 package kvstore.persister.sqlite;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.HashMap;
@@ -84,6 +85,49 @@ public class SQLitePersisterTest {
 		for (int i = 0; i < 100; i++) {
 			assertEquals("value" + i, persister.read("key" + i));
 		}
+		
+		cleanup();
+	}
+	
+	@Test
+	public void performanceTest() {
+		SQLitePersister<String, String> persister = new SQLitePersister<>(testFile, true, false, 0L);
+
+		long start = System.currentTimeMillis();
+		for (int i = 0; i < 100; i++) {
+			persister.add("key" + i, "value" + i);
+		}
+
+		Map<String, String> data = persister.load();
+		for (int j = 0; j < 10000; j++) {
+			for (int i = 0; i < 100; i++) {
+				data.get("key" + i);
+			}
+		}
+		long stop = System.currentTimeMillis();
+		
+		long noCacheSpeed = stop - start;
+		System.out.println("No cache speed: " + noCacheSpeed);
+		
+		persister = new SQLitePersister<>(testFile, true, true, 1024 * 1024 * 32);
+		start = System.currentTimeMillis();
+		for (int i = 0; i < 100; i++) {
+			persister.add("key" + i, "value" + i);
+		}
+		
+		data = persister.load();
+		for (int j = 0; j < 10000; j++) {
+			for (int i = 0; i < 100; i++) {
+				data.get("key" + i);
+			}
+		}
+		stop = System.currentTimeMillis();
+		
+		long cacheSpeed = stop - start;
+		
+		System.out.println("Cache speed: " + cacheSpeed);
+		
+		assertTrue(cacheSpeed < noCacheSpeed);
 		
 		cleanup();
 	}
