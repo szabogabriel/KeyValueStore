@@ -11,7 +11,7 @@ import org.junit.Test;
 
 public class SQLitePersisterTest {
 	
-	private static File testFile = new File("createDataSqlite.db");
+	private static File testFile = new File("./test/kvstore/persister/sqlite/createDataSqlite.db");
 	
 	@Test
 	public void createData() {
@@ -22,6 +22,8 @@ public class SQLitePersisterTest {
 			persister.add("key" + i, "theValue" + i);
 		}
 		
+		persister.close();
+		
 		persister = new SQLitePersister<>(testFile, false);
 		
 		for (int i = 0; i < 10; i++) {
@@ -29,6 +31,8 @@ public class SQLitePersisterTest {
 			
 			assertEquals("theValue" + i, data);
 		}
+		
+		persister.close();
 		
 		cleanup();
 	}
@@ -42,11 +46,15 @@ public class SQLitePersisterTest {
 			persister.add("key" + i, "theValue" + i);
 		}
 		
+		persister.close();
+		
 		persister = new SQLitePersister<>(testFile, false);
 		
 		persister.remove("key5");
 		
 		assertEquals(Boolean.TRUE, null == persister.read("key5"));
+
+		persister.close();
 		
 		cleanup();
 	}
@@ -66,6 +74,8 @@ public class SQLitePersisterTest {
 		
 		assertEquals(100, storedSize);
 		
+		persister.close();
+		
 		cleanup();
 	}
 	
@@ -79,6 +89,7 @@ public class SQLitePersisterTest {
 		}
 		
 		persister.save(toPersist);
+		persister.close();
 		
 		persister = new SQLitePersister<>(testFile, false);
 
@@ -86,6 +97,7 @@ public class SQLitePersisterTest {
 			assertEquals("value" + i, persister.read("key" + i));
 		}
 		
+		persister.close();
 		cleanup();
 	}
 	
@@ -109,6 +121,8 @@ public class SQLitePersisterTest {
 		long noCacheSpeed = stop - start;
 		System.out.println("No cache speed: " + noCacheSpeed);
 		
+		persister.close();
+		
 		persister = new SQLitePersister<>(testFile, true, true, 1024 * 1024 * 32);
 		start = System.currentTimeMillis();
 		for (int i = 0; i < 100; i++) {
@@ -128,6 +142,8 @@ public class SQLitePersisterTest {
 		System.out.println("Cache speed: " + cacheSpeed);
 		
 		assertTrue(cacheSpeed < noCacheSpeed);
+		
+		persister.close();
 		
 		cleanup();
 	}

@@ -56,4 +56,9 @@ public class DefaultDataWriter implements DataWriter {
 		}
 	}
 
+	@Override
+	public void close() {
+		//nothing to do.
+	}
+
 }

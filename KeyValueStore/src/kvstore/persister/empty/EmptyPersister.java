@@ -25,4 +25,9 @@ public class EmptyPersister<K extends Serializable, V extends Serializable> impl
 	public void save(Map<K, V> data) {
 	}
 
+	@Override
+	public void close() {
+		
+	}
+
 }

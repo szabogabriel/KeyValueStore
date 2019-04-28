@@ -29,12 +29,15 @@ public class SQLitePersister<K extends Serializable, V extends Serializable> imp
 		this(targetDB, create, true, 1024 * 1024 * 32);
 	}
 	
-	public SQLitePersister(File targetDB, boolean create, boolean cacheKeys, long maxsize) {
+	public SQLitePersister(File targetDB, boolean create, boolean cacheKeys, long maxsize) {		
 		CACHE_KEYS = cacheKeys;
 		MAX_CACHE_SIZE = maxsize;
 		try {
 			if (create && targetDB.exists()) {
-				targetDB.delete();
+				boolean deleted = targetDB.delete();
+				if (!deleted) {
+					throw new RuntimeException("Cannot delete the existing database: " + targetDB.getAbsolutePath());
+				}
 			}
 			Class.forName("org.sqlite.JDBC");
 			
@@ -319,6 +322,15 @@ public class SQLitePersister<K extends Serializable, V extends Serializable> imp
 	@Override
 	public void store(K key, V value) {
 		add(key, value);
+	}
+
+	@Override
+	public void close() {
+		try {
+			CONN.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

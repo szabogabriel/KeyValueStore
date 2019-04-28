@@ -69,5 +69,10 @@ public class AuditPersister<K extends Serializable, V extends Serializable> impl
 			add(it, data.get(it));
 		}
 	}
+
+	@Override
+	public void close() {
+		DATA_WRITER.close();
+	}
 	
 }

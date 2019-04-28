@@ -58,4 +58,8 @@ public class Store<K extends Serializable, V extends Serializable> {
 		return data.keySet();
 	}
 	
+	public void close() {
+		PERSISTER.close();
+	}
+	
 }

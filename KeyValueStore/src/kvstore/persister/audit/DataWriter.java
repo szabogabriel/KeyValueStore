@@ -7,5 +7,7 @@ public interface DataWriter {
 	void addAction(Action action);
 	
 	List<Action> loadActions();
+	
+	void close();
 
 }
