@@ -15,7 +15,6 @@ public class AuditPersister<K extends Serializable, V extends Serializable> impl
 	
 	public AuditPersister(DataWriter dataWriter) {
 		this.DATA_WRITER = dataWriter;
-		new Thread(DATA_WRITER).start();
 	}
 	
 	public AuditPersister(File persisterFile) {

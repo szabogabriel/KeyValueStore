@@ -16,7 +16,7 @@ import kvstore.persister.audit.AuditPersister;
 
 public class AuditPersisterTest {
 	
-	private File testFile = new File("./test/kvstore/persister/createData.file");
+	private File testFile = new File("./test/kvstore/persister/audit/createData.file");
 	private String line_add_a_a = "add,rO0ABXQAAWE=,rO0ABXQAAWE=";
 	private String line_remove_a = "remove,rO0ABXQAAWE=";
 	
@@ -50,6 +50,7 @@ public class AuditPersisterTest {
 			assertEquals(line_remove_a, line);
 		} catch (Exception e) {
 			e.printStackTrace();
+			assertTrue(false);
 		}
 		
 		cleanup();
