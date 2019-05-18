@@ -42,12 +42,15 @@ public class Action {
 	public String toString() {
 		StringBuilder toWrite = new StringBuilder();
 		toWrite
-		.append(Operations.ADD.toString())
-		.append(",")
-		.append(KEY)
-		.append(",")
-		.append(VALUE)
-		.append(System.lineSeparator());
+			.append(OPERATION.toString())
+			.append(",")
+			.append(KEY);
+		if (VALUE != null) {
+			toWrite
+				.append(",")
+				.append(VALUE);
+		}
+		toWrite.append(System.lineSeparator());
 		return toWrite.toString();
 	}
 }

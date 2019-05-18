@@ -20,38 +20,32 @@ public class DefaultDataWriter implements DataWriter {
 	
 	public void addAction(Action action) {
 		EVENT_BUFFER.offer(action);
+		writeBuffer();
 	}
 	
 	public List<Action> loadActions() {
 		List<Action> ret = new LinkedList<>();
 		
-		try (BufferedReader in = new BufferedReader(new FileReader(AUDITFILE))) {
-			String line;
-			
-			while ((line = in.readLine()) != null) {
-				ret.add(new Action(line));
+		if (AUDITFILE.exists()) {
+			try (BufferedReader in = new BufferedReader(new FileReader(AUDITFILE))) {
+				String line;
+				
+				while ((line = in.readLine()) != null) {
+					ret.add(new Action(line));
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 		
 		return ret;
 	}
 
-	@Override
-	public void run() {
-		while (true) {
-			Action tmpAction = EVENT_BUFFER.poll();
-			if (tmpAction != null) {
-				writeToFile(tmpAction.toString());
-			} else {
-				try {
-					Thread.sleep(100);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
+	private void writeBuffer() {
+		Action tmpAction;
+		while ((tmpAction = EVENT_BUFFER.poll()) != null) {
+			writeToFile(tmpAction.toString());
+		} 
 	}
 	
 	private void writeToFile(String data) {
@@ -60,6 +54,11 @@ public class DefaultDataWriter implements DataWriter {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void close() {
+		//nothing to do.
 	}
 
 }

@@ -13,4 +13,6 @@ public interface Persister<K extends Serializable, V extends Serializable> {
 	
 	void save(Map<K, V> data);
 	
+	void close();
+	
 }

@@ -1,6 +1,6 @@
 <project name="KeyValueStore" basedir="." default="all">
 	
-	<property name="version" value="0.5" />
+	<property name="version" value="0.6" />
 	
 	<property name="dir.src" value="${basedir}/src" />
 	<property name="dir.bin" value="${basedir}/bin" />

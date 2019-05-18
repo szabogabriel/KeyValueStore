@@ -15,7 +15,6 @@ public class AuditPersister<K extends Serializable, V extends Serializable> impl
 	
 	public AuditPersister(DataWriter dataWriter) {
 		this.DATA_WRITER = dataWriter;
-		new Thread(DATA_WRITER).start();
 	}
 	
 	public AuditPersister(File persisterFile) {
@@ -69,6 +68,11 @@ public class AuditPersister<K extends Serializable, V extends Serializable> impl
 		for (K it : data.keySet()) {
 			add(it, data.get(it));
 		}
+	}
+
+	@Override
+	public void close() {
+		DATA_WRITER.close();
 	}
 	
 }
