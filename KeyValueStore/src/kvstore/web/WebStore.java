@@ -69,6 +69,7 @@ public final class WebStore {
 					} else {
 						LOGGER.info("  Value found.");
 						LOGGER.fine("  Returning: " + ret);
+						arg0.getResponseHeaders().set("Content-type", ret.getMimeType());
 						arg0.sendResponseHeaders(200, ret.getData().getBytes().length);
 						arg0.getResponseBody().write(ret.getData().getBytes());
 					}
@@ -91,7 +92,7 @@ public final class WebStore {
 						if (value != null && value.length() > 0) {
 							LOGGER.info("  Value received.");
 							LOGGER.fine(value);
-							STORE.add(key, new TypedData<String>(value, "text/plain"));
+							STORE.add(key, new TypedData<String>(value, getContentType(arg0)));
 							arg0.sendResponseHeaders(200, 0L);
 						} else {
 							LOGGER.severe("  No value received.");
@@ -118,7 +119,7 @@ public final class WebStore {
 							LOGGER.info("  Sent value received.");
 							LOGGER.fine(value);
 							STORE.remove(key);
-							STORE.add(key, new TypedData<String>(value, "text/plain"));
+							STORE.add(key, new TypedData<String>(value, getContentType(arg0)));
 							arg0.sendResponseHeaders(200, 0L);
 						} else {
 							LOGGER.severe("  No value received.");
@@ -150,6 +151,11 @@ public final class WebStore {
 					arg0.sendResponseHeaders(500, 0L);
 				}
 				arg0.getResponseBody().close();
+			}
+			
+			private String getContentType(HttpExchange arg0) throws IOException {
+				String ret = arg0.getRequestHeaders().entrySet().stream().filter(E -> E.getKey().equalsIgnoreCase("content-type")).map(E -> E.getValue().toString()).findFirst().orElse("text/plain");
+				return ret;
 			}
 			
 			private void doDefault(HttpExchange arg0) throws IOException {
