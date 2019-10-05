@@ -10,22 +10,23 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.Test;
 
-import kvstore.persister.audit.AuditPersister;
+import kvstore.persister.TypedData;
 
 public class AuditPersisterTest {
 	
 	private File testFile = new File("./test/kvstore/persister/audit/createData.file");
-	private String line_add_a_a = "add,rO0ABXQAAWE=,rO0ABXQAAWE=";
-	private String line_remove_a = "remove,rO0ABXQAAWE=";
+	private String line_add_a_a = "add,text/plain,rO0ABXQAAWE=,rO0ABXQAAWE=";
+	private String line_remove_a = "remove,,rO0ABXQAAWE=";
 	
 	@Test
 	public void loadEmpty() {
 		cleanup();
 		
 		AuditPersister<String, String> persister = new AuditPersister<>(testFile);
-		Map<String, String> data = persister.load();
+		Map<String, TypedData<String>> data = persister.load();
 		
 		assertTrue(data.size() == 0);
 		
@@ -37,7 +38,7 @@ public class AuditPersisterTest {
 		cleanup();
 		
 		AuditPersister<String, String> persister = new AuditPersister<>(testFile);
-		persister.add("a", "a");
+		persister.add("a", new TypedData<String>("a", "text/plain"));
 		persister.remove("a");
 		
 		try (BufferedReader in = new BufferedReader(new FileReader(testFile))) {		
@@ -70,7 +71,7 @@ public class AuditPersisterTest {
 		}
 		
 		AuditPersister<String, String> persister = new AuditPersister<>(testFile);
-		Map<String, String> data = persister.load();
+		Map<String, TypedData<String>> data = persister.load();
 		
 		assertTrue(data.size() == 0);
 	}
@@ -91,16 +92,17 @@ public class AuditPersisterTest {
 		}
 		
 		AuditPersister<String, String> persister = new AuditPersister<>(testFile);
-		Map<String, String> data = persister.load();
+		Map<String, TypedData<String>> data = persister.load();
 		
 		assertTrue(data.size() == 1);
 		assertTrue(data.containsKey("a"));
-		assertTrue(data.get("a").equals("a"));
+		assertTrue(data.get("a").equals(new TypedData<String>("a", "text/plain")));
 		
 		cleanup();
 	}
 	
-	private void cleanup() {
+	@Before
+	public void cleanup() {
 		if (testFile.exists()) {
 			testFile.delete();
 		}

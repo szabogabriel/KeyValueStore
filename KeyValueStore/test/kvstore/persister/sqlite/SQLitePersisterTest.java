@@ -9,6 +9,8 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import kvstore.persister.TypedData;
+
 public class SQLitePersisterTest {
 	
 	private static File testFile = new File("./test/kvstore/persister/sqlite/createDataSqlite.db");
@@ -19,7 +21,7 @@ public class SQLitePersisterTest {
 		
 		for (int i = 0; i < 10; i++) {
 			System.out.println("Adding data No." + i);
-			persister.add("key" + i, "theValue" + i);
+			persister.add("key" + i, new TypedData<String>("theValue" + i, "text/plain"));
 		}
 		
 		persister.close();
@@ -27,9 +29,9 @@ public class SQLitePersisterTest {
 		persister = new SQLitePersister<>(testFile, false);
 		
 		for (int i = 0; i < 10; i++) {
-			String data = persister.read("key" + i);
+			TypedData<String> data = persister.read("key" + i);
 			
-			assertEquals("theValue" + i, data);
+			assertEquals("theValue" + i, data.getData());
 		}
 		
 		persister.close();
@@ -43,7 +45,7 @@ public class SQLitePersisterTest {
 		
 		for (int i = 0; i < 10; i++) {
 			System.out.println("Adding data No." + i);
-			persister.add("key" + i, "theValue" + i);
+			persister.add("key" + i, new TypedData<String>("theValue" + i, "text/plain"));
 		}
 		
 		persister.close();
@@ -62,10 +64,10 @@ public class SQLitePersisterTest {
 	@Test
 	public void saveMap() {
 		SQLitePersister<String, String> persister = new SQLitePersister<>(testFile, true);
-		Map<String, String> toPersist = new HashMap<>();
+		Map<String, TypedData<String>> toPersist = new HashMap<>();
 
 		for (int i = 0; i < 100; i++) {
-			toPersist.put("key" + i, "value" + i);
+			toPersist.put("key" + i, new TypedData<String>("value" + i, "text/plain"));
 		}
 		
 		persister.save(toPersist);
@@ -82,10 +84,10 @@ public class SQLitePersisterTest {
 	@Test
 	public void loadMap() {
 		SQLitePersister<String, String> persister = new SQLitePersister<>(testFile, true);
-		Map<String, String> toPersist = new HashMap<>();
+		Map<String, TypedData<String>> toPersist = new HashMap<>();
 
 		for (int i = 0; i < 100; i++) {
-			toPersist.put("key" + i, "value" + i);
+			toPersist.put("key" + i, new TypedData<String>("value" + i, "text/plain"));
 		}
 		
 		persister.save(toPersist);
@@ -94,7 +96,7 @@ public class SQLitePersisterTest {
 		persister = new SQLitePersister<>(testFile, false);
 
 		for (int i = 0; i < 100; i++) {
-			assertEquals("value" + i, persister.read("key" + i));
+			assertEquals("value" + i, persister.read("key" + i).getData());
 		}
 		
 		persister.close();
@@ -107,10 +109,10 @@ public class SQLitePersisterTest {
 
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < 100; i++) {
-			persister.add("key" + i, "value" + i);
+			persister.add("key" + i, new TypedData<String>("value" + i, "text/plain"));
 		}
 
-		Map<String, String> data = persister.load();
+		Map<String, TypedData<String>> data = persister.load();
 		for (int j = 0; j < 10000; j++) {
 			for (int i = 0; i < 100; i++) {
 				data.get("key" + i);
@@ -126,7 +128,7 @@ public class SQLitePersisterTest {
 		persister = new SQLitePersister<>(testFile, true, true, 1024 * 1024 * 32);
 		start = System.currentTimeMillis();
 		for (int i = 0; i < 100; i++) {
-			persister.add("key" + i, "value" + i);
+			persister.add("key" + i, new TypedData<String>("value" + i, "text/plain"));
 		}
 		
 		data = persister.load();

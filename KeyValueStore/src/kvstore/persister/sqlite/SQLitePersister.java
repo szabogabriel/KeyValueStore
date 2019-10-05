@@ -14,9 +14,10 @@ import java.util.Set;
 import kvstore.dataStructures.LazyMap;
 import kvstore.dataStructures.LazyMapDataProvider;
 import kvstore.persister.Persister;
+import kvstore.persister.TypedData;
 import kvstore.utils.SerializableUtils;
 
-public class SQLitePersister<K extends Serializable, V extends Serializable> implements Persister<K, V>, LazyMapDataProvider<K, V> {
+public class SQLitePersister<K extends Serializable, V extends Serializable> implements Persister<K, V>, LazyMapDataProvider<K, TypedData<V>> {
 
 	private static final String TABLE_NAME = "SQLITEAUDITTABLE";
 	
@@ -54,7 +55,7 @@ public class SQLitePersister<K extends Serializable, V extends Serializable> imp
 	private void createTable() {
 		PreparedStatement ps = null;
 		try {
-			ps = prepare("CREATE TABLE " + TABLE_NAME + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, KKEY TEXT, VVALUE TEXT);");
+			ps = prepare("CREATE TABLE " + TABLE_NAME + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, KKEY TEXT, VVALUE TEXT, TYPE TEXT);");
 			ps.execute();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -75,17 +76,18 @@ public class SQLitePersister<K extends Serializable, V extends Serializable> imp
 	}
 
 	@Override
-	public Map<K, V> load() {
-		return new LazyMap<K, V>(this, CACHE_KEYS, MAX_CACHE_SIZE);
+	public Map<K, TypedData<V>> load() {
+		return new LazyMap<K, TypedData<V>>(this, CACHE_KEYS, MAX_CACHE_SIZE);
 	}
 
 	@Override
-	public void add(K key, V value) {
+	public void add(K key, TypedData<V> value) {
 		PreparedStatement ps = null;
 		try {
-			ps = prepare("INSERT INTO " + TABLE_NAME + " (KKEY, VVALUE) VALUES (?, ?);");
+			ps = prepare("INSERT INTO " + TABLE_NAME + " (KKEY, VVALUE, TYPE) VALUES (?, ?, ?);");
 			ps.setString(1, SerializableUtils.toBase64(key));
-			ps.setString(2, SerializableUtils.toBase64(value));
+			ps.setString(2, SerializableUtils.toBase64(value.getData()));
+			ps.setString(3, value.getMimeType());
 			ps.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -123,7 +125,7 @@ public class SQLitePersister<K extends Serializable, V extends Serializable> imp
 	}
 
 	@Override
-	public void save(Map<K, V> data) {
+	public void save(Map<K, TypedData<V>> data) {
 		data.keySet().stream().forEach(k -> add(k, data.get(k)));
 	}
 
@@ -250,13 +252,13 @@ public class SQLitePersister<K extends Serializable, V extends Serializable> imp
 	}
 
 	@Override
-	public boolean isKnownData(V value) {
+	public boolean isKnownData(TypedData<V> value) {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		boolean ret = false;
 		try {
 			ps = prepare("SELECT KKEY FROM " + TABLE_NAME + " WHERE VVALUE=?;");
-			ps.setString(1, SerializableUtils.toBase64(value));
+			ps.setString(1, SerializableUtils.toBase64(value.getData()));
 			rs = ps.executeQuery();
 			rs.next();
 			ret = SerializableUtils.fromBase64(rs.getString(1)) != null; 
@@ -284,17 +286,18 @@ public class SQLitePersister<K extends Serializable, V extends Serializable> imp
 	}
 
 	@Override
-	public V read(K key) {
+	public TypedData<V> read(K key) {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		V ret = null;;
+		TypedData<V> ret = null;;
 		try {
-			ps = prepare("SELECT VVALUE FROM " + TABLE_NAME + " WHERE KKEY=?;");
+			ps = prepare("SELECT VVALUE, TYPE FROM " + TABLE_NAME + " WHERE KKEY=?;");
 			ps.setString(1, SerializableUtils.toBase64(key));
 			rs = ps.executeQuery();
 			if (rs.next()) {
-				String tmp = rs.getString(1);
-				ret = SerializableUtils.fromBase64(tmp);
+				String value = rs.getString(1);
+				String type = rs.getString(2);
+				ret = new TypedData<V>(SerializableUtils.fromBase64(value), type);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -320,7 +323,7 @@ public class SQLitePersister<K extends Serializable, V extends Serializable> imp
 	}
 
 	@Override
-	public void store(K key, V value) {
+	public void store(K key, TypedData<V> value) {
 		add(key, value);
 	}
 

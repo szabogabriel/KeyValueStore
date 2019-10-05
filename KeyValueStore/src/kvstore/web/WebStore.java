@@ -10,6 +10,7 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import kvstore.Store;
+import kvstore.persister.TypedData;
 
 public final class WebStore {
 	
@@ -60,7 +61,7 @@ public final class WebStore {
 			
 			private void doGet(HttpExchange arg0, String key) throws IOException {
 				try {
-					String ret = STORE.get(key);
+					TypedData<String> ret = STORE.get(key);
 					
 					if (ret == null) {
 						LOGGER.info("  Value not found.");
@@ -68,8 +69,8 @@ public final class WebStore {
 					} else {
 						LOGGER.info("  Value found.");
 						LOGGER.fine("  Returning: " + ret);
-						arg0.sendResponseHeaders(200, ret.getBytes().length);
-						arg0.getResponseBody().write(ret.getBytes());
+						arg0.sendResponseHeaders(200, ret.getData().getBytes().length);
+						arg0.getResponseBody().write(ret.getData().getBytes());
 					}
 				} catch (Exception e) {
 					LOGGER.severe("Error when handling request!" + e.getLocalizedMessage());
@@ -90,7 +91,7 @@ public final class WebStore {
 						if (value != null && value.length() > 0) {
 							LOGGER.info("  Value received.");
 							LOGGER.fine(value);
-							STORE.add(key, value);
+							STORE.add(key, new TypedData<String>(value, "text/plain"));
 							arg0.sendResponseHeaders(200, 0L);
 						} else {
 							LOGGER.severe("  No value received.");
@@ -117,7 +118,7 @@ public final class WebStore {
 							LOGGER.info("  Sent value received.");
 							LOGGER.fine(value);
 							STORE.remove(key);
-							STORE.add(key, value);
+							STORE.add(key, new TypedData<String>(value, "text/plain"));
 							arg0.sendResponseHeaders(200, 0L);
 						} else {
 							LOGGER.severe("  No value received.");
@@ -134,7 +135,7 @@ public final class WebStore {
 			
 			private void doDelete(HttpExchange arg0, String key) throws IOException {
 				try {
-					String ret = STORE.get(key);
+					TypedData<String> ret = STORE.get(key);
 					
 					if (ret == null) {
 						LOGGER.info("  Value not found.");

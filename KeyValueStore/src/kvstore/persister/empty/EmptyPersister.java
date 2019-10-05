@@ -5,16 +5,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 import kvstore.persister.Persister;
+import kvstore.persister.TypedData;
 
 public class EmptyPersister<K extends Serializable, V extends Serializable> implements Persister<K, V> {
 
 	@Override
-	public Map<K, V> load() {
+	public Map<K, TypedData<V>> load() {
 		return new HashMap<>();
 	}
 
 	@Override
-	public void add(K key, V value) {
+	public void add(K key, TypedData<V> value) {
 	}
 
 	@Override
@@ -22,7 +23,7 @@ public class EmptyPersister<K extends Serializable, V extends Serializable> impl
 	}
 
 	@Override
-	public void save(Map<K, V> data) {
+	public void save(Map<K, TypedData<V>> data) {
 	}
 
 	@Override
