@@ -8,17 +8,17 @@ import com.sun.net.httpserver.HttpExchange;
 
 import kvstore.persister.TypedData;
 
-public class GetSingle extends KvHttpHandler {
-	
+public class GetMultiple extends KvHttpHandler {
+
 	private final Logger LOGGER = Logger.getLogger(this.getClass());
 	
-	public GetSingle(WebStore parent) {
-		super(parent);
+	public GetMultiple(WebStore store) {
+		super(store);
 	}
 
 	@Override
 	public void handle(HttpExchange exchange, List<String> keys, KvRequest request) throws IOException {
-		if ("GET".equalsIgnoreCase(request.getMethod()) && keys != null && keys.size() == 1) {
+		if ("GET".equalsIgnoreCase(request.getMethod()) && keys != null && keys.size() > 1) {
 			LOGGER.info("  Handling GET");
 			try {
 				TypedData<String> ret = getStore().get(keys.get(0));

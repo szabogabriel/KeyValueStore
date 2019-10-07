@@ -17,8 +17,8 @@ public class PostSingle extends KvHttpHandler {
 	}
 
 	@Override
-	public void handle(HttpExchange exchange, List<String> keys, String method) throws IOException {
-		if ("POST".equalsIgnoreCase(method) && keys != null && keys.size() == 1) {
+	public void handle(HttpExchange exchange, List<String> keys, KvRequest request) throws IOException {
+		if ("POST".equalsIgnoreCase(request.getMethod()) && keys != null && keys.size() == 1) {
 			LOGGER.info("  Handling POST.");
 			try {
 				if (getStore().get(keys.get(0)) != null) {
@@ -44,7 +44,7 @@ public class PostSingle extends KvHttpHandler {
 				exchange.sendResponseHeaders(500, 0L);
 			}
 		} else {
-			next().handle(exchange, keys, method);
+			next().handle(exchange, keys, request);
 		}
 	}
 

@@ -10,7 +10,7 @@ import kvstore.Store;
 
 public abstract class KvHttpHandler {
 	
-	public abstract void handle(HttpExchange exchange, List<String> keys, String method) throws IOException ;
+	public abstract void handle(HttpExchange exchange, List<String> keys, KvRequest request) throws IOException ;
 	
 	private final WebStore STORE;
 	private KvHttpHandler next;

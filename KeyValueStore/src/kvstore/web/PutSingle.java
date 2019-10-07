@@ -17,8 +17,8 @@ public class PutSingle extends KvHttpHandler {
 	}
 
 	@Override
-	public void handle(HttpExchange exchange, List<String> keys, String method) throws IOException {
-		if ("PUT".equalsIgnoreCase(method) && keys != null && keys.size() == 1) {
+	public void handle(HttpExchange exchange, List<String> keys, KvRequest request) throws IOException {
+		if ("PUT".equalsIgnoreCase(request.getMethod()) && keys != null && keys.size() == 1) {
 			LOGGER.info("  Handling PUT.");
 			try {
 				if (getStore().get(keys.get(0)) == null) {
@@ -45,7 +45,7 @@ public class PutSingle extends KvHttpHandler {
 			}
 			exchange.getResponseBody().close();
 		} else {
-			next().handle(exchange, keys, method);			
+			next().handle(exchange, keys, request);			
 		}
 	}
 

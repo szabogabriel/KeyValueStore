@@ -16,7 +16,7 @@ public class DefaultHandler extends KvHttpHandler{
 	}
 
 	@Override
-	public void handle(HttpExchange exchange, List<String> keys, String method) throws IOException {
+	public void handle(HttpExchange exchange, List<String> keys, KvRequest method) throws IOException {
 		LOGGER.info("  Handling default.");
 		exchange.sendResponseHeaders(404, NOT_FOUND.length());
 		exchange.getResponseBody().write(NOT_FOUND.getBytes());

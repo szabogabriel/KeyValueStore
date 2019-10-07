@@ -53,17 +53,19 @@ public final class WebStore {
 		return new HttpHandler() {
 			@Override
 			public void handle(HttpExchange arg0) throws IOException {
-				String method = arg0.getRequestMethod().toUpperCase();
-				List<String> key = getKey((arg0.getRequestURI().toString()));
+				KvRequest request = new KvRequest(URL, arg0);
+				List<String> key = getKey(request);
 				
-				HANDLER.handle(arg0, key, method);
+				HANDLER.handle(arg0, key, request);
 			}
 		};
 	}
 	
-	private List<String> getKey(String requestUri) {
+	
+	
+	private List<String> getKey(KvRequest requestUri) {
 		List<String> ret = new ArrayList<>();
-		String request = requestUri.startsWith(URL) ? requestUri.substring(URL.length()) : "";
+		String request = requestUri.getKey();
 		
 		if (request.contains("*")) {
 			request = request.replaceAll("\\*", ".*");
