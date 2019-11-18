@@ -3,21 +3,24 @@ package kvstore.persister.audit;
 public class Action {
 	private final String KEY;
 	private final String VALUE;
+	private final String TYPE;
 	private final Operations OPERATION;
 	
-	public Action(Operations operation, String key, String value) {
+	public Action(Operations operation, String key, String value, String mimeType) {
 		this.KEY = key;
 		this.VALUE = value;
+		this.TYPE = mimeType;
 		this.OPERATION = operation;
 	}
 	
 	public Action(String data) {
 		String [] tmp = data.split(",");
 		if (tmp.length >= 2) {
-			KEY = tmp[1];
 			OPERATION = Operations.getOperations(tmp[0]);
-			if (tmp.length == 3) {
-				VALUE = tmp[2];
+			TYPE = tmp[1];
+			KEY = tmp[2];
+			if (tmp.length == 4) {
+				VALUE = tmp[3];
 			} else {
 				VALUE = null;
 			}
@@ -38,12 +41,20 @@ public class Action {
 		return OPERATION;
 	}
 	
+	public String getType() {
+		return TYPE;
+	}
+	
 	@Override
 	public String toString() {
 		StringBuilder toWrite = new StringBuilder();
 		toWrite
 			.append(OPERATION.toString())
-			.append(",")
+			.append(",");
+		if (TYPE != null) {
+			toWrite.append(TYPE);
+		}
+		toWrite.append(",")
 			.append(KEY);
 		if (VALUE != null) {
 			toWrite

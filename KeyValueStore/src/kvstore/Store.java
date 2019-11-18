@@ -5,13 +5,14 @@ import java.util.Map;
 import java.util.Set;
 
 import kvstore.persister.Persister;
+import kvstore.persister.TypedData;
 import kvstore.persister.empty.EmptyPersister;
 
 public class Store<K extends Serializable, V extends Serializable> {
 	
 	private final Persister<K, V> PERSISTER;
 	
-	private Map<K, V> data;
+	private Map<K, TypedData<V>> data;
 	
 	public Store() {
 		this (new EmptyPersister<K, V>());
@@ -22,7 +23,7 @@ public class Store<K extends Serializable, V extends Serializable> {
 		data = persister.load();
 	}
 	
-	public void add(K key, V data) {
+	public void add(K key, TypedData<V> data) {
 		this.data.put(key, data);
 		PERSISTER.add(key, data);
 	}
@@ -32,7 +33,7 @@ public class Store<K extends Serializable, V extends Serializable> {
 		PERSISTER.remove(key);;
 	}
 	
-	public void update(K key, V data) {
+	public void update(K key, TypedData<V> data) {
 		if (this.data.containsKey(key)) {
 			remove(key);
 		}
@@ -40,12 +41,12 @@ public class Store<K extends Serializable, V extends Serializable> {
 		add(key, data);
 	}
 	
-	public V get(K key) {
+	public TypedData<V> get(K key) {
 		return get(key, null);
 	}
 	
-	public V get(K key, V def) {
-		V ret = def;
+	public TypedData<V> get(K key, TypedData<V> def) {
+		TypedData<V> ret = def;
 		
 		if (data.containsKey(key)) {
 			ret = data.get(key);

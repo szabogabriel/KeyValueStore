@@ -7,7 +7,7 @@ readonly val=${3}
 
 if [ "${method}" = "GET" ]
 then
-  curl ${address}${key}
+  curl -v ${address}${key}
 fi
 
 if [ "${method}" = "POST" -o "${method}" = "PUT" ]

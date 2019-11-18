@@ -5,13 +5,13 @@ import java.util.Map;
 
 public interface Persister<K extends Serializable, V extends Serializable> {
 	
-	Map<K, V> load();
+	Map<K, TypedData<V>> load();
 	
-	void add(K key, V value);
+	void add(K key, TypedData<V> value);
 	
 	void remove(K key);
 	
-	void save(Map<K, V> data);
+	void save(Map<K, TypedData<V>> data);
 	
 	void close();
 	
