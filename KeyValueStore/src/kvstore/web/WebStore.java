@@ -41,6 +41,7 @@ public final class WebStore {
 		KvHttpHandler first = new GetSingle(this);
 		
 		first
+			.addNext(new GetMultiple(this))
 			.addNext(new PostSingle(this))
 			.addNext(new PutSingle(this))
 			.addNext(new DeleteSingle(this))
