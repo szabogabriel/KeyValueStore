@@ -25,7 +25,7 @@ public class GetMultiple extends KvHttpHandler {
 				String ret = mapKeysToReturnString(keys);
 				
 				LOGGER.info("  Values found.");
-				if (hhe.getAllParameters().containsKey("KEYS")) {
+				if (hhe.getAllParameters().containsKey("keys")) {
 					LOGGER.fine("  Returning: " + ret);
 					exchange.getResponseHeaders().set("Content-type", "Text/Plain");
 					exchange.sendResponseHeaders(200, ret.getBytes().length);
