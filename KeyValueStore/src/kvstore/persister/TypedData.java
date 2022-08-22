@@ -35,6 +35,7 @@ public class TypedData<T> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
+		@SuppressWarnings("rawtypes")
 		TypedData other = (TypedData) obj;
 		if (DATA == null) {
 			if (other.DATA != null)

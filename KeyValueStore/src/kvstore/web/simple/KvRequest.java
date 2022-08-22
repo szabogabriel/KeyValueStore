@@ -1,4 +1,4 @@
-package kvstore.web;
+package kvstore.web.simple;
 
 import java.util.HashMap;
 import java.util.Map;

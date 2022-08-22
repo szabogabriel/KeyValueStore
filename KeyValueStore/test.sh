@@ -1,13 +1,13 @@
 #!/bin/sh
 
-readonly address=http://localhost:60065/store/
+readonly address=http://localhost:9998/store/
 readonly method=${1}
 readonly key=${2}
 readonly val=${3}
 
 if [ "${method}" = "GET" ]
 then
-  curl -v ${address}${key}
+  curl ${address}${key}
 fi
 
 if [ "${method}" = "POST" -o "${method}" = "PUT" ]

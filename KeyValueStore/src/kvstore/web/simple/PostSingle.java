@@ -1,4 +1,4 @@
-package kvstore.web;
+package kvstore.web.simple;
 
 import java.io.IOException;
 import java.util.List;
